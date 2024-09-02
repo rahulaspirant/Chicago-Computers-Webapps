@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+
+    <h1>Hello</h1>
+    <label>Name</label>
+    <input type="text" id="username">
+    <button id="btn">Run It!</button>
+
+    <script>
+      document.getElementById("btn").addEventListener("click", dostuff);
+
+      function dostuff() {
+        var uname = document.getElementById("username").value;
+        google.script.run.userclicked(uname);
+        document.getElementById("username").value = "";
+      }
+    </script> 
+
+  </body>
+</html>
