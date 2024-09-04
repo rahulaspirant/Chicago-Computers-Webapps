@@ -1,0 +1,155 @@
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('form');
+}
+// This function is the entry point for the web app. It returns the HTML output from the 'form.html' file.
+
+// Function to fetch gender and hobbies options from the 'Dropdown' sheet
+function getDropdownOptions() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Dropdown');
+  // Get the active spreadsheet and the sheet named 'Dropdown'
+  
+  // Get the last row with data
+  var lastRow = sheet.getLastRow();
+  // Determine the last row with data in the sheet
+  
+  // Fetch gender options from column A (from row 1 to the last row)
+  var genderRange = sheet.getRange(1, 1, lastRow, 1).getValues();
+  var genders = genderRange.map(function(row) { return row[0]; }).filter(String);  // Filter out empty values
+  // Get the values from column A (gender column) and map them to an array, filtering out any empty values
+  
+  // Fetch hobbies options from column B (from row 1 to the last row)
+  var hobbiesRange = sheet.getRange(1, 2, lastRow, 1).getValues();
+  var hobbies = hobbiesRange.map(function(row) { return row[0]; }).filter(String);  // Filter out empty values
+  // Get the values from column B (hobbies column) and map them to an array, filtering out any empty values
+  
+  // Return the gender and hobbies options
+  return {
+    genders: genders,
+    hobbies: hobbies
+  };
+  // Return an object containing the gender and hobbies options
+}
+
+function submitForm(formData) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet1');
+  // Get the active spreadsheet and the sheet named 'Sheet1'
+  
+  sheet.appendRow([formData.name, formData.age, formData.gender, formData.email, formData.hobbies]);
+  // Append a new row to the sheet with the form data
+  
+  return "Data submitted successfully!";
+  // Return a success message
+}
+
+
+/////////////////////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////////////////
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <h2>Simple Web Form</h2>
+    
+    <!-- HTML form to collect user data -->
+    <form id="dataForm" onsubmit="handleSubmit(event)">
+      
+      <!-- Name input field -->
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required><br><br>
+      
+      <!-- Age input field -->
+      <label for="age">Age:</label>
+      <input type="number" id="age" name="age" required><br><br>
+      
+      <!-- Gender dropdown field, populated dynamically from the 'Dropdown' sheet -->
+      <label for="gender">Gender:</label>
+      <select id="gender" name="gender">
+        <option value="">Select Gender</option> <!-- Default option -->
+      </select><br><br>
+      
+      <!-- Email input field -->
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required><br><br>
+      
+      <!-- Hobbies dropdown field, populated dynamically from the 'Dropdown' sheet -->
+      <label for="hobbies">Hobbies:</label>
+      <select id="hobbies" name="hobbies">
+        <option value="">Select Hobbies</option> <!-- Default option -->
+      </select><br><br>
+      
+      <!-- Submit button -->
+      <input type="submit" value="Submit">
+    </form>
+    
+    <!-- Area to display the response message after form submission -->
+    <div id="response"></div>
+    
+    <script>
+      // This script runs when the page is loaded to fetch and populate the dropdowns for gender and hobbies.
+      document.addEventListener('DOMContentLoaded', function() {
+        // Call the Apps Script function to get dropdown options and populate the dropdowns
+        google.script.run.withSuccessHandler(populateDropdowns).getDropdownOptions();
+      });
+      
+      // Function to populate the Gender and Hobbies dropdown fields with data from Google Sheet
+      function populateDropdowns(options) {
+        var genderDropdown = document.getElementById('gender'); // Reference to the gender dropdown
+        var hobbiesDropdown = document.getElementById('hobbies'); // Reference to the hobbies dropdown
+        
+        // Clear existing options (if any)
+        genderDropdown.innerHTML = '<option value="">Select Gender</option>';
+        hobbiesDropdown.innerHTML = '<option value="">Select Hobbies</option>';
+        // Clear any existing options in the dropdowns
+        
+        // Populate the gender dropdown with options
+        options.genders.forEach(function(option) {
+          var opt = document.createElement('option');
+          opt.value = option; // Set the option value
+          opt.text = option;  // Set the option text
+          genderDropdown.add(opt); // Add the option to the dropdown
+        });
+        // Loop through the gender options and create an option element for each, setting the value and text, and adding it to the gender dropdown
+        
+        // Populate the hobbies dropdown with options
+        options.hobbies.forEach(function(option) {
+          var opt = document.createElement('option');
+          opt.value = option; // Set the option value
+          opt.text = option;  // Set the option text
+          hobbiesDropdown.add(opt); // Add the option to the dropdown
+        });
+        // Loop through the hobbies options and create an option element for each, setting the value and text, and adding it to the hobbies dropdown
+      }
+      
+      // Function to handle form submission
+      function handleSubmit(event) {
+        event.preventDefault(); // Prevent the default form submission
+        // Prevent the default form submission behavior
+        
+        // Gather form data
+        var formData = {
+          name: document.getElementById('name').value,
+          age: document.getElementById('age').value,
+          gender: document.getElementById('gender').value,
+          email: document.getElementById('email').value,
+          hobbies: document.getElementById('hobbies').value
+        };
+        // Gather the form data from the input fields and dropdowns
+        
+        // Call the Apps Script function to submit the form data
+        google.script.run.withSuccessHandler(function(response) {
+          document.getElementById('response').innerText = response; // Display response message
+          document.getElementById('dataForm').reset(); // Reset the form
+        }).submitForm(formData);
+        // Call the Apps Script function 'submitForm' with the gathered form data
+        // Display the response message and reset the form after successful submission
+      }
+    </script>
+  </body>
+</html>
